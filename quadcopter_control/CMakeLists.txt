@@ -13,6 +13,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 
+include_directories(include)
+
 add_executable(face_tracker_node src/face_tracker_node.cpp)
 
 ament_target_dependencies(face_tracker_node
@@ -29,6 +31,14 @@ target_link_libraries(face_tracker_node
 
 install(TARGETS face_tracker_node
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include/
 )
 
 ament_package()

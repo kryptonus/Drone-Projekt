@@ -152,11 +152,12 @@ private:
                 return std::max(lo, std::min(hi, v));
             };
 
-            drone_yaw_ += clamp(corr_yaw,    -0.05, 0.05);
+            drone_y_ -= clamp(corr_yaw, -0.05, 0.05);
             drone_z_   += clamp(corr_height, -0.05, 0.05);
             drone_x_   += clamp(corr_dist,   -0.05, 0.05);
             drone_z_    = std::max(0.3, std::min(4.0, drone_z_));
             drone_x_    = std::max(-5.0, std::min(5.0, drone_x_));
+            drone_y_    = std::max(-5.0, std::min(5.0, drone_y_));
 
             moveDroneTo(drone_x_, drone_y_, drone_z_, drone_yaw_);
 
