@@ -1,0 +1,330 @@
+<?xml version="1.0"?>
+<robot name="stealth_quad" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- VARIABLES — changing these resizes the whole drone -->
+  <xacro:property name="body_mass"   value="1.5"/>
+  <xacro:property name="body_x"      value="0.35"/>
+  <xacro:property name="body_y"      value="0.35"/>
+  <xacro:property name="body_z"      value="0.08"/>
+  <xacro:property name="arm_length"  value="0.20"/>
+  <xacro:property name="arm_radius"  value="0.013"/>
+  <xacro:property name="prop_radius" value="0.13"/>
+
+  <!-- Physics calculator for box shapes -->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${(1/12)*m*(y*y + z*z)}"  ixy="0.0" ixz="0.0"
+        iyy="${(1/12)*m*(x*x + z*z)}"  iyz="0.0"
+        izz="${(1/12)*m*(x*x + y*y)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Physics calculator for cylinder shapes -->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${(1/12)*m*(3*r*r + h*h)}"  ixy="0.0" ixz="0.0"
+        iyy="${(1/12)*m*(3*r*r + h*h)}"  iyz="0.0"
+        izz="${0.5*m*r*r}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- MAIN BODY -->
+  <link name="base_link">
+    <xacro:box_inertia m="${body_mass}" x="${body_x}" y="${body_y}" z="${body_z}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+      <material name="stealth_black">
+        <color rgba="0.08 0.08 0.08 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <!-- ARM MACRO — defined once, used 4 times -->
+  <xacro:macro name="arm_assembly" params="name angle_deg spin_dir">
+    <xacro:property name="angle_rad" value="${angle_deg * 3.14159265 / 180.0}"/>
+    <xacro:property name="tip_x"     value="${arm_length * cos(angle_rad)}"/>
+    <xacro:property name="tip_y"     value="${arm_length * sin(angle_rad)}"/>
+    <xacro:property name="mid_x"     value="${(arm_length/2) * cos(angle_rad)}"/>
+    <xacro:property name="mid_y"     value="${(arm_length/2) * sin(angle_rad)}"/>
+
+    <link name="arm_${name}">
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0"
+                 iyy="0.0001" iyz="0"
+                 izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin xyz="${mid_x} ${mid_y} 0" rpy="0 ${pi/2} ${angle_rad}"/>
+        <geometry>
+          <cylinder radius="${arm_radius}" length="${arm_length}"/>
+        </geometry>
+        <material name="arm_color">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="${mid_x} ${mid_y} 0" rpy="0 ${pi/2} ${angle_rad}"/>
+        <geometry>
+          <cylinder radius="${arm_radius}" length="${arm_length}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint_arm_${name}" type="fixed">
+      <parent link="base_link"/>
+      <child  link="arm_${name}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="arm_${name}">
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
+    <link name="motor_${name}">
+      <inertial>
+        <mass value="0.06"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0"
+                 iyy="0.0001" iyz="0"
+                 izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.018" length="0.028"/>
+        </geometry>
+        <material name="motor_dark">
+          <color rgba="0.05 0.05 0.05 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.018" length="0.028"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint_motor_${name}" type="fixed">
+      <parent link="arm_${name}"/>
+      <child  link="motor_${name}"/>
+      <origin xyz="${tip_x} ${tip_y} ${body_z/2 + 0.014}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="motor_${name}">
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <link name="prop_${name}">
+      <inertial>
+        <mass value="0.025"/>
+        <inertia ixx="0.00015" ixy="0" ixz="0"
+                 iyy="0.00015" iyz="0"
+                 izz="0.00028"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${prop_radius}" length="0.006"/>
+        </geometry>
+        <material name="prop_color">
+          <color rgba="0.2 0.2 0.2 0.85"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${prop_radius}" length="0.006"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint_prop_${name}" type="continuous">
+      <parent link="motor_${name}"/>
+      <child  link="prop_${name}"/>
+      <origin xyz="0 0 0.017" rpy="0 0 0"/>
+      <axis xyz="0 0 ${spin_dir}"/>
+    </joint>
+
+    <gazebo reference="prop_${name}">
+      <material>Gazebo/FlatBlack</material>
+    </gazebo>
+
+  </xacro:macro>
+
+  <!-- CREATE ALL 4 ARMS -->
+  <xacro:arm_assembly name="FL" angle_deg="45"  spin_dir="1"/>
+  <xacro:arm_assembly name="FR" angle_deg="315" spin_dir="-1"/>
+  <xacro:arm_assembly name="RL" angle_deg="135" spin_dir="-1"/>
+  <xacro:arm_assembly name="RR" angle_deg="225" spin_dir="1"/>
+
+  <!-- CAMERA -->
+  <link name="camera_link">
+    <inertial>
+      <mass value="0.03"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0"
+               iyy="0.00001" iyz="0"
+               izz="0.00001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.03 0.025 0.025"/>
+      </geometry>
+      <material name="camera_body">
+        <color rgba="0.02 0.02 0.02 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.025 0.025"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="camera_link"/>
+    <origin xyz="${body_x/2 + 0.015} 0 -0.01" rpy="0 0.261 0"/>
+  </joint>
+
+  <gazebo reference="camera_link">
+    <material>Gazebo/Black</material>
+    <sensor type="camera" name="front_camera">
+      <update_rate>30</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip><near>0.02</near><far>300</far></clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/stealth_quad</namespace>
+        </ros>
+        <camera_name>front_camera</camera_name>
+        <frame_name>camera_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- LIDAR -->
+  <link name="lidar_link">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0"
+               iyy="0.00001" iyz="0"
+               izz="0.00001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="0.028" length="0.038"/>
+      </geometry>
+      <material name="lidar_body">
+        <color rgba="0.12 0.12 0.12 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.028" length="0.038"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="lidar_link"/>
+    <origin xyz="0 0 ${body_z/2 + 0.025}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <material>Gazebo/DarkGrey</material>
+    <sensor type="ray" name="top_lidar">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <plugin name="lidar_controller" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/stealth_quad</namespace>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- IMU -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.005"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0"
+               iyy="0.000001" iyz="0"
+               izz="0.000001"/>
+    </inertial>
+    <visual>
+      <geometry><box size="0.012 0.012 0.004"/></geometry>
+      <material name="pcb_green">
+        <color rgba="0.0 0.45 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry><box size="0.012 0.012 0.004"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>200</update_rate>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <ros>
+          <namespace>/stealth_quad</namespace>
+          <remapping>~/out:=imu/data</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
