@@ -1,23 +1,23 @@
 face_tracker_node:
   ros__parameters:
     # PID gains for yaw (left/right tracking)
-    # Increase kp_yaw if drone is slow to follow face horizontally
+    # Increase kp_yaw if the drone is slow to follow face horizontally
     kp_yaw: 0.003
     ki_yaw: 0.0001
     kd_yaw: 0.002
 
-    # PID gains for height (up/down tracking)
+    # PID gains for the height (up/down tracking)
     kp_height: 0.003
     ki_height: 0.0001
     kd_height: 0.002
 
-    # PID gains for distance (forward/back tracking)
-    # Controls how close drone stays — tune target_face_width first
+    # PID gains for the distance (forward/back tracking)
+    # Controls how close the drone stays — tune ##target_face_width## first
     kp_dist: 0.005
     ki_dist: 0.0001
     kd_dist: 0.002
 
-    # Target face width in pixels
+    # ##Target_face _width## in pixels
     # At 1.5m distance, face is approximately 150px wide in 640x480 frame
     # Increase to make drone hover closer, decrease to hover further back
     target_face_width: 150

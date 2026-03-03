@@ -63,7 +63,7 @@ class FaceTrackingDrone(Node):
         self.image_center_y = 240
         self.move_drone_to(0.0, 0.0, 1.5, 0.0)
         self.get_logger().info('Drone hovering at 1.5m — face tracking active!')
-        self.timer = self.create_wall_timer(0.033, self.tracking_loop)
+        self.timer = self.create_timer(0.033, self.tracking_loop)
         self.face_lost_count = 0
 
     def move_drone_to(self, x, y, z, yaw):

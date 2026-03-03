@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/vaishnav/ros2_ws/install/quadcopter_control/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/vaishnav/ros2_ws/src/quadcopter_control/include/**",
+        "/home/vaishnav/ros2_ws/src/quadcopter_description/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ros2",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
