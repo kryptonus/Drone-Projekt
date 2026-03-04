@@ -1,31 +1,16 @@
 face_tracker_node:
   ros__parameters:
-    # PID gains for yaw (left/right tracking)
-    # Increase kp_yaw if the drone is slow to follow face horizontally
-    kp_yaw: 0.003
-    ki_yaw: 0.0001
-    kd_yaw: 0.002
-
-    # PID gains for the height (up/down tracking)
-    kp_height: 0.003
-    ki_height: 0.0001
-    kd_height: 0.002
-
-    # PID gains for the distance (forward/back tracking)
-    # Controls how close the drone stays — tune ##target_face_width## first
-    kp_dist: 0.005
-    ki_dist: 0.0001
+    kp_yaw: 0.05
+    ki_yaw: 0.0
+    kd_yaw: 0.003
+    kp_height: 0.05
+    ki_height: 0.0
+    kd_height: 0.003
+    kp_dist: 0.01
+    ki_dist: 0.0
     kd_dist: 0.002
-
-    # ##Target_face _width## in pixels
-    # At 1.5m distance, face is approximately 150px wide in 640x480 frame
-    # Increase to make drone hover closer, decrease to hover further back
     target_face_width: 150
-
-    # Haar cascade path — can be overridden without recompiling
     cascade_path: "/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml"
-
-    # Drone safety limits in meters
-    min_height: 0.3   # floor: avoid ground effect below 0.3m
-    max_height: 4.0   # ceiling: room height constraint
-    max_xy_range: 5.0 # lateral range limit
+    min_height: 0.3
+    max_height: 4.0
+    max_xy_range: 15.0

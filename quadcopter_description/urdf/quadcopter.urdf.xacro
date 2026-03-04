@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="stealth_quad" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- VARIABLES — changing these resizes the whole drone -->
+  <!-- PROPERTIES -->
   <xacro:property name="body_mass"   value="1.5"/>
   <xacro:property name="body_x"      value="0.35"/>
   <xacro:property name="body_y"      value="0.35"/>
@@ -10,7 +10,7 @@
   <xacro:property name="arm_radius"  value="0.013"/>
   <xacro:property name="prop_radius" value="0.13"/>
 
-  <!-- Physics calculator for box shapes -->
+  <!-- PHYSICS FOR BOX SHAPES -->
   <xacro:macro name="box_inertia" params="m x y z">
     <inertial>
       <mass value="${m}"/>
@@ -21,7 +21,8 @@
     </inertial>
   </xacro:macro>
 
-  <!-- Physics calculator for cylinder shapes -->
+  <!-- PHYSICS FOR CYLINDERS -->
+
   <xacro:macro name="cylinder_inertia" params="m r h">
     <inertial>
       <mass value="${m}"/>
@@ -41,7 +42,7 @@
         <box size="${body_x} ${body_y} ${body_z}"/>
       </geometry>
       <material name="stealth_black">
-        <color rgba="0.08 0.08 0.08 1.0"/>
+        <color rgba="0.06 0.08 0.12 1.0"/>
       </material>
     </visual>
     <collision>
@@ -56,7 +57,8 @@
     <material>Gazebo/DarkGrey</material>
   </gazebo>
 
-  <!-- ARM MACRO — defined once, used 4 times -->
+  <!-- ARM ASSEMBLY MACRO -->
+
   <xacro:macro name="arm_assembly" params="name angle_deg spin_dir">
     <xacro:property name="angle_rad" value="${angle_deg * 3.14159265 / 180.0}"/>
     <xacro:property name="tip_x"     value="${arm_length * cos(angle_rad)}"/>
@@ -111,7 +113,7 @@
           <cylinder radius="0.018" length="0.028"/>
         </geometry>
         <material name="motor_dark">
-          <color rgba="0.05 0.05 0.05 1.0"/>
+        <color rgba="0.05 0.05 0.05 1.0"/>
         </material>
       </visual>
       <collision>
@@ -129,7 +131,7 @@
     </joint>
 
     <gazebo reference="motor_${name}">
-      <material>Gazebo/Black</material>
+      <material>Gazebo/Red</material>
     </gazebo>
 
     <link name="prop_${name}">
@@ -142,10 +144,10 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder radius="${prop_radius}" length="0.006"/>
+          <cylinder radius="${prop_radius}" length="0.002"/>
         </geometry>
         <material name="prop_color">
-          <color rgba="0.2 0.2 0.2 0.85"/>
+          <color rgba="0.15 0.15 0.15 0.6"/>
         </material>
       </visual>
       <collision>
@@ -169,7 +171,7 @@
 
   </xacro:macro>
 
-  <!-- CREATE ALL 4 ARMS -->
+  <!-- 4 ARMS --> 
   <xacro:arm_assembly name="FL" angle_deg="45"  spin_dir="1"/>
   <xacro:arm_assembly name="FR" angle_deg="315" spin_dir="-1"/>
   <xacro:arm_assembly name="RL" angle_deg="135" spin_dir="-1"/>
@@ -228,6 +230,7 @@
   </gazebo>
 
   <!-- LIDAR -->
+
   <link name="lidar_link">
     <inertial>
       <mass value="0.05"/>
@@ -289,6 +292,7 @@
   </gazebo>
 
   <!-- IMU -->
+
   <link name="imu_link">
     <inertial>
       <mass value="0.005"/>
@@ -327,4 +331,83 @@
     </sensor>
   </gazebo>
 
+
+<!-- LANDING LEGS -->
+
+  <xacro:macro name="landing_leg" params="prefix x_pos y_pos">
+
+    <!-- Upper leg strut -->
+    <link name="${prefix}_leg_upper">
+      <visual>
+        <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.005" length="0.08"/>
+        </geometry>
+        <material name="leg_color">
+          <color rgba="0.08 0.08 0.08 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.005" length="0.08"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_leg_upper_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_leg_upper"/>
+      <origin xyz="${x_pos} ${y_pos} -0.04" rpy="0 0.3 0"/>
+    </joint>
+
+    <!-- Lower leg strut -->
+
+    <link name="${prefix}_leg_foot">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry>
+          <cylinder radius="0.005" length="0.08"/>
+        </geometry>
+        <material name="leg_foot_color">
+          <color rgba="0.08 0.08 0.08 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry><cylinder radius="0.005" length="0.08"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_leg_foot_joint" type="fixed">
+      <parent link="${prefix}_leg_upper"/>
+      <child link="${prefix}_leg_foot"/>
+      <origin xyz="0 0 -0.08" rpy="0 0 0"/>
+    </joint>
+
+  </xacro:macro>
+
+  <!-- Instantiate 4 legs -->
+
+  <xacro:landing_leg prefix="fl" x_pos=" 0.12" y_pos=" 0.12"/>
+  <xacro:landing_leg prefix="fr" x_pos=" 0.12" y_pos="-0.12"/>
+  <xacro:landing_leg prefix="rl" x_pos="-0.12" y_pos=" 0.12"/>
+  <xacro:landing_leg prefix="rr" x_pos="-0.12" y_pos="-0.12"/>
+  <gazebo reference="fl_leg_upper"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="fl_leg_foot"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="fr_leg_upper"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="fr_leg_foot"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="rl_leg_upper"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="rl_leg_foot"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="rr_leg_upper"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="rr_leg_foot"><material>Gazebo/Black</material></gazebo>
 </robot>
+

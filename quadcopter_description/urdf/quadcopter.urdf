@@ -17,7 +17,7 @@
       </geometry>
       <material name="stealth_black">
         <color rgba="0.08 0.08 0.08 1.0"/>
-      </material>
+      </material> 
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
