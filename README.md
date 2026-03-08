@@ -1,5 +1,4 @@
-# Stealth Quadcopter — ROS 2 Humble + Gazebo Classic
-# Stealth Quadcopter — Autonomous Drone Simulation
+# Stealth Quadcopter: ROS 2 Humble + Gazebo Classic
 
 ![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)
 ![C++](https://img.shields.io/badge/C++-17-red)
@@ -19,7 +18,6 @@ using a C++ PID controller to correct position 30 times per second.
 
 ## Demo
 ![Demo](demo.gif)
-
 > Drone follows face in real time — C++ PID controller + OpenCV Haar Cascade
 
 ---
@@ -77,7 +75,7 @@ Drone Camera (/stealth_quad/front_camera/image_raw)
 
 ---
 
-## Quickstart
+## Quickstart - additionally I have made aliases for these bash terminals (d.tracker, d.build, d.sim)
 ```bash
 # Clone
 git clone git@github.com:kryptonus/Drone-Projekt.git
@@ -109,9 +107,16 @@ ros2 run quadcopter_control face_tracker_node --ros-args \
 
 ---
 
-## Why I Made This
-I built this over a weekend (was like a hackathon XD) because it was listed as a future goal on my CV
-and I could not leave it as just a plan.
+## Related Projects
 
-**Author:** Vaishnav — IEB, TH Mannheim
-**Focus:** Defense, Autonomous Systems, Computer Vision, Robotics
+| Repo | What it is |
+|------|-----------|
+| [C++ PID Controller](https://github.com/kryptonus/PID-Controller-Cpp) | The standalone PID library used in this drone — built and tested separately before being integrated |
+
+---
+
+## Why I Made This
+I built this over a weekend (was like a hackathon XD) because it was listed as a future goal on my CV and I could not leave it as just a future plan.
+
+**Author:** Vaishnav — IEB, TH Mannheim.
+**Focus:** Defense, Autonomous Systems, Computer Vision, Robotics.
